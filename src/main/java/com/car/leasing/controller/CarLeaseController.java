@@ -6,6 +6,7 @@ import com.car.leasing.repository.entity.Car;
 import com.car.leasing.repository.entity.User;
 import com.car.leasing.service.CarLeaseService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,8 +30,8 @@ public class CarLeaseController {
         Onboard users
     */
     @PostMapping("/sign-in")
-    public ResponseEntity<String> signIn(@RequestBody User user){
-        return carLeaseService.createAccount(user);
+    public ResponseEntity<String> signIn(@RequestBody User user, final HttpServletResponse response){
+        return carLeaseService.createAccount(user, response);
     }
 
     /*
