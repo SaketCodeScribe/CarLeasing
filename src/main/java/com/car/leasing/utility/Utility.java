@@ -1,6 +1,9 @@
 package com.car.leasing.utility;
 
+import com.car.leasing.repository.SessionRepository;
+import com.car.leasing.repository.entity.Session;
 import com.car.leasing.repository.entity.User;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -10,28 +13,31 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Date;
 
 public class Utility {
-
-
-    public static String getEncryption(User user) {
-        byte[] encryptedText = null;
+    public static Session getEncryption(User user, SessionRepository sessionRepo) {
+        Session session = null;
         try {
             Date currentDate = new Date();
             SimpleDateFormat df = new SimpleDateFormat("dd-mm-yyyy HH:mm:ss");
             String value = user.toString() + df.format(currentDate);
+            value.replace("\\s+", "");
             KeyGenerator keyGenerator = KeyGenerator.getInstance("DES");
-            byte[] key = "777".getBytes();
-            SecretKey secretKey = new SecretKeySpec(key, "DES");
-            byte[] text = value.getBytes();
+            SecretKey secretKey = keyGenerator.generateKey();
+            byte[] text = value.getBytes("UTF8");
             Cipher cipher = Cipher.getInstance("DES");
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            encryptedText = cipher.doFinal(text);
+            byte[] encryptedText = cipher.doFinal(text);
+            String cookie = Base64.getEncoder().encodeToString(encryptedText);
+            cookie.replace("\\s+", "");
+            session = new Session(cookie, user, df.parse(df.format(currentDate)));
+
         }
         catch(Exception ex){
             throw new RuntimeException();
         }
-        return new String(encryptedText);
+        return session;
     }
 }
